@@ -81,6 +81,28 @@ With objWorkbook.Worksheets(FDSheet)
     objExcel.selection.Range(.Cells(2, 1), .Cells(LastRow, 1)) = "'=VLOOKUP(LOOKUP(9,99999999999999E+307;SEARCH(output!$B$1:$B$"&rowsUsed&";F2);output!$B$1:$B$"&rowsUsed&");output!$B$1:$C$"&rowsUsed&";2;FALSE)"
     objExcel.selection.Cells(1, 2) = "'If FALSE, then dismatch" 'info on col head
     objExcel.selection.Range(.Cells(2, 2), .Cells(LastRow, 2)) = "=G2=H2"
+
+    'add mapping for FD:
+    .UsedRange.Cells(1).Find("Kl.Pk").Next.Select
+    objExcel.selection.EntireColumn.Insert
+    .Cells(1, 7) = "'Reg.piez.(ligums)"
+    Dim objFSO   : Set objFSO = CreateObject("Scripting.FileSystemObject")
+    Dim objFile   : Set objFile = objFSO.OpenTextFile(strDirectory &"\mappingSubjects.csv", 1)
+
+    Dim arrFields   : arrFields = Split(objFile.ReadAll, vbCrLf)
+    objFile.Close
+
+    Dim j
+    Dim ij : ij = 1
+    Do While ij <= LastRow
+        For j = LBound(arrFields) To UBound(arrFields)
+            If Split(arrFields(j),",")(1) = .Cells(ij,6) Then
+                .Cells(ij, 7) = Split(arrFields(j),",")(2)
+            End If
+        Next
+        ij = ij + 1
+    Loop
+
 End With
     
 
@@ -88,6 +110,7 @@ End With
 Set objExcel = Nothing
 Set objWorkbook = Nothing
 Set dict = Nothing
+Set objFSO = Nothing
 
 'functions>>
 Function MyDateFormat(TheDate)
